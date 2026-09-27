@@ -123,10 +123,10 @@ int OBK_SPI_Init(const spi_config_t *config) {
 #if PLATFORM_BK7231N || PLATFORM_BK7238 || PLATFORM_BK7252N
     uint32_t val;
 
-    val = GFUNC_MODE_SPI_USE_GPIO_14;
+    val = GFUNC_MODE_SPI_GPIO_14;
     sddev_control(GPIO_DEV_NAME, CMD_GPIO_ENABLE_SECOND, &val);
 
-    val = GFUNC_MODE_SPI_USE_GPIO_16_17;
+    val = GFUNC_MODE_SPI_GPIO_16_17;
     sddev_control(GPIO_DEV_NAME, CMD_GPIO_ENABLE_SECOND, &val);
 #endif
 
@@ -144,9 +144,6 @@ int OBK_SPI_Init(const spi_config_t *config) {
             ((config->polarity == SPI_POLARITY_LOW ? 0 : SPI_CPOL) |
              (config->phase == SPI_PHASE_1ST_EDGE ? 0 : SPI_CPHA))
         );
-
-    ADDLOG_ERROR(LOG_FEATURE_DRV, "SPI_Init not supported");
-    return -1;
 #endif
 }
 
