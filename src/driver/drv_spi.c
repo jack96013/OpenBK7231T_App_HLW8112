@@ -110,13 +110,41 @@ int OBK_SPI_Init(const spi_config_t *config) {
 	spi_trans.trans_done = 1;
 
 	return err;
+// #elif PLATFORM_BEKEN_NEW
+// 	mode = config->role == SPI_ROLE_MASTER ? SPI_MASTER : SPI_SLAVE;
+// 	if(mode == SPI_MASTER)
+// 		return bk_spi_master_init(config->baud_rate, ((config->polarity == SPI_POLARITY_LOW ? 0 : SPI_CPOL) | (config->phase == SPI_PHASE_1ST_EDGE ? 0 : SPI_CPHA)));
+// 	else
+// 		return bk_spi_slave_init(config->baud_rate, ((config->polarity == SPI_POLARITY_LOW ? 0 : SPI_CPOL) | (config->phase == SPI_PHASE_1ST_EDGE ? 0 : SPI_CPHA)));
+// #else
+
 #elif PLATFORM_BEKEN_NEW
-	mode = config->role == SPI_ROLE_MASTER ? SPI_MASTER : SPI_SLAVE;
-	if(mode == SPI_MASTER)
-		return bk_spi_master_init(config->baud_rate, ((config->polarity == SPI_POLARITY_LOW ? 0 : SPI_CPOL) | (config->phase == SPI_PHASE_1ST_EDGE ? 0 : SPI_CPHA)));
-	else
-		return bk_spi_slave_init(config->baud_rate, ((config->polarity == SPI_POLARITY_LOW ? 0 : SPI_CPOL) | (config->phase == SPI_PHASE_1ST_EDGE ? 0 : SPI_CPHA)));
-#else
+
+#if PLATFORM_BK7231N || PLATFORM_BK7238 || PLATFORM_BK7252N
+    uint32_t val;
+
+    val = GFUNC_MODE_SPI_USE_GPIO_14;
+    sddev_control(GPIO_DEV_NAME, CMD_GPIO_ENABLE_SECOND, &val);
+
+    val = GFUNC_MODE_SPI_USE_GPIO_16_17;
+    sddev_control(GPIO_DEV_NAME, CMD_GPIO_ENABLE_SECOND, &val);
+#endif
+
+    mode = config->role == SPI_ROLE_MASTER ? SPI_MASTER : SPI_SLAVE;
+
+    if(mode == SPI_MASTER)
+        return bk_spi_master_init(
+            config->baud_rate,
+            ((config->polarity == SPI_POLARITY_LOW ? 0 : SPI_CPOL) |
+             (config->phase == SPI_PHASE_1ST_EDGE ? 0 : SPI_CPHA))
+        );
+    else
+        return bk_spi_slave_init(
+            config->baud_rate,
+            ((config->polarity == SPI_POLARITY_LOW ? 0 : SPI_CPOL) |
+             (config->phase == SPI_PHASE_1ST_EDGE ? 0 : SPI_CPHA))
+        );
+
     ADDLOG_ERROR(LOG_FEATURE_DRV, "SPI_Init not supported");
     return -1;
 #endif
